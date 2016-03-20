@@ -1,4 +1,6 @@
 .idea/*
 libs/*
 *.iml
-Graphs/test/resources/wordnet
+Graphs/src/test/resources/wordnet
+out
+target/

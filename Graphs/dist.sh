@@ -1,0 +1,1 @@
+zip -j wordnet.zip src/main/java/WordNet.java src/main/java/SAP.java src/main/java/Outcast.java src/main/java/Synset.java
