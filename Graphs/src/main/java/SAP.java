@@ -5,8 +5,10 @@ import java.util.*;
 @SuppressWarnings("WeakerAccess")
 public class SAP {
     private final Digraph graph;
-    private ArrayList<Integer> modifiedV = new ArrayList<>(1024);
-    private ArrayList<Integer> modifiedW = new ArrayList<>(1024);
+    private int[] modifiedV;
+    private int modifiedVPtr;
+    private int[] modifiedW;
+    private int modifiedWPtr;
     private final int[] distToFromV;
     private final int[] distToFromW;
     private final HashMap<CacheKey, Pair> cachedResults = new HashMap<>();
@@ -16,6 +18,8 @@ public class SAP {
         this.graph = new Digraph(graph);
         this.distToFromV = newTrackingArray();
         this.distToFromW = newTrackingArray();
+        this.modifiedV = new int[graph.V()];
+        this.modifiedW = new int[graph.V()];
     }
 
     // length of shortest ancestral path between v and w; -1 if no such path
@@ -61,8 +65,8 @@ public class SAP {
         reset();
         distToFromV[v] = 0;
         distToFromW[w] = 0;
-        modifiedV.add(v);
-        modifiedW.add(w);
+        modifiedV[modifiedVPtr++] = v;
+        modifiedW[modifiedWPtr++] = w;
         final ArrayDeque<IntAndArray> queue = new ArrayDeque<>(1024);
         queue.add(new IntAndArray(v, distToFromV, distToFromW, modifiedV));
         queue.add(new IntAndArray(w, distToFromW, distToFromV, modifiedW));
@@ -70,16 +74,25 @@ public class SAP {
         return dualBfs(queue);
     }
 
+    private boolean contains(int[] xs, int limit, int x) {
+        for(int i = 0; i < limit; ++i) {
+            if(xs[i] == x) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private Pair fasterSearch(Iterable<Integer> v, Iterable<Integer> w) {
         reset();
         for (int node : v) {
             distToFromV[node] = 0;
-            modifiedV.add(node);
+            modifiedV[modifiedVPtr++] = node;
         }
         for (int node : w) {
             distToFromW[node] = 0;
-            modifiedW.add(node);
-            if(modifiedV.contains(node)) {
+            modifiedW[modifiedWPtr++] = node;
+            if(contains(modifiedV, modifiedVPtr, node)) {
                 return new Pair(node, 0);
             }
         }
@@ -119,7 +132,11 @@ public class SAP {
                     }
                 }
                 current.dist[next] = distance;
-                current.tracker.add(next);
+                if(current.tracker == modifiedV) {
+                    modifiedV[modifiedVPtr++] = next;
+                } else {
+                    modifiedW[modifiedWPtr++] = next;
+                }
                 queue.addFirst(current.withId(next));
             }
         }
@@ -128,14 +145,14 @@ public class SAP {
 
     @SuppressWarnings("ForLoopReplaceableByForEach")
     private void reset() {
-        for(int i = 0; i < modifiedV.size(); ++i) {
-            distToFromV[modifiedV.get(i)] = Integer.MAX_VALUE;
+        for(int i = 0; i < modifiedVPtr; ++i) {
+            distToFromV[modifiedV[i]] = Integer.MAX_VALUE;
         }
-        for(int i = 0; i < modifiedW.size(); ++i) {
-            distToFromW[modifiedW.get(i)] = Integer.MAX_VALUE;
+        for(int i = 0; i < modifiedWPtr; ++i) {
+            distToFromW[modifiedW[i]] = Integer.MAX_VALUE;
         }
-        modifiedV = new ArrayList<>(1024);
-        modifiedW = new ArrayList<>(1024);
+        modifiedVPtr = 0;
+        modifiedWPtr = 0;
     }
 
     private int[] newTrackingArray() {
@@ -187,9 +204,9 @@ public class SAP {
         private final int id;
         private final int[] dist;
         private final int[] otherDist;
-        private final ArrayList<Integer> tracker;
+        private final int[] tracker;
 
-        public IntAndArray(int id, int[] dist, int[] otherDist, ArrayList<Integer> tracker) {
+        public IntAndArray(int id, int[] dist, int[] otherDist, int[] tracker) {
             this.id = id;
             this.dist = dist;
             this.otherDist = otherDist;
