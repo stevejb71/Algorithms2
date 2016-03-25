@@ -2,7 +2,7 @@ import org.junit.Test
 import org.junit.Assert._
 
 class OutcastTest {
-  private val outcast: Outcast = new Outcast(new WordNet(Files.wordNetFile("synsets.txt"), Files.wordNetFile("hypernyms.txt")))
+  private val outcast = new Outcast(new WordNet(Files.wordNetFile("synsets.txt"), Files.wordNetFile("hypernyms.txt")))
 
   @Test def outcast5() {
     assertEquals("table", outcast.outcast(Array("horse", "zebra", "cat", "bear", "table")))

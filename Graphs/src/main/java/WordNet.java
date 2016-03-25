@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public class WordNet {
     private final Digraph hypernyms;
     private final SAP sap;
-    private final Map<Integer, Synset> synsets = new HashMap<>();
+    private Synset[] synsets;
     private final Map<String, Set<Integer>> nouns = new HashMap<>();
 
     // constructor takes the name of the two input files
@@ -17,7 +17,7 @@ public class WordNet {
         throwIfNull(synsetsFile, hypernymsFile);
 
         readSynsets(synsetsFile);
-        this.hypernyms = readHypernyms(this.synsets.size(), hypernymsFile);
+        this.hypernyms = readHypernyms(this.synsets.length, hypernymsFile);
         final DirectedCycle directedCycle = new DirectedCycle(this.hypernyms);
         if (directedCycle.hasCycle()) {
             throw new IllegalArgumentException("has cycle");
@@ -60,7 +60,7 @@ public class WordNet {
         final Set<Integer> idA = getNounId(nounA);
         final Set<Integer> idB = getNounId(nounB);
         int ancestorId = sap.ancestor(idA, idB);
-        final List<String> nounsList = synsets.get(ancestorId).nouns;
+        final List<String> nounsList = synsets[ancestorId].nouns;
         final StringJoiner joiner = new StringJoiner(" ");
         for (String noun : nounsList) {
             joiner.add(noun);
@@ -85,6 +85,7 @@ public class WordNet {
     private void readSynsets(String filename) {
         final In in = new In(filename);
         final String[] lines = in.readAllLines();
+        synsets = new Synset[lines.length];
         Arrays.asList(lines).stream().map(l -> l.split(",")).forEach(l -> {
             final int id = Integer.parseInt(l[0]);
             final List<String> nouns = Arrays.asList(l[1].split(" "));
@@ -96,7 +97,7 @@ public class WordNet {
                 }
                 ids.add(id);
             }
-            this.synsets.put(id, new Synset(id, nouns));
+            this.synsets[id] = new Synset(id, nouns);
         });
     }
 

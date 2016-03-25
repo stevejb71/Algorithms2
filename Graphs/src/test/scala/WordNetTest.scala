@@ -63,4 +63,20 @@ class WordNetTest {
     assertTrue((endNanos - startNanos).toString, endNanos - startNanos < 0.1e6)
     assertEquals(27, distance)
   }
+
+  @Test
+  def distance_for_multiple_American_water_spaniel_and_histology_is_fast() {
+    val wordNet = new WordNet(Files.wordNetFile("synsets.txt"), Files.wordNetFile("hypernyms.txt"))
+    for(i <- 0 to 20) {
+      wordNet.distance("American_water_spaniel", "histology")
+    }
+    val startNanos = System.nanoTime()
+    for(i <- 0 to 20) {
+      wordNet.distance("American_water_spaniel", "histology")
+    }
+    val distance = wordNet.distance("American_water_spaniel", "histology")
+    val endNanos = System.nanoTime()
+    assertTrue((endNanos - startNanos).toString, endNanos - startNanos < 1.0e6)
+    assertEquals(27, distance)
+  }
 }
