@@ -1,6 +1,6 @@
 import java.io.File
 
-import edu.princeton.cs.algs4.Picture
+import edu.princeton.cs.algs4._
 import org.specs2.mutable._
 
 class SeamCarverSpec extends Specification {
@@ -8,12 +8,11 @@ class SeamCarverSpec extends Specification {
     new SeamCarver(null) should throwA[NullPointerException]
   }
 
-  "repeated calls to picture() return reference to same Picture object" >> {
+  "takes a copy on construction" >> {
     val picture = new Picture(20, 30)
     val seamCarver = new SeamCarver(picture)
 
-    seamCarver.picture() should beTheSameAs(picture)
-    seamCarver.picture() should beTheSameAs(picture)
+    seamCarver.picture() should not beTheSameAs(picture)
   }
 
   "energy checks its x-bound" >> {
@@ -160,6 +159,16 @@ class SeamCarverSpec extends Specification {
     shrunk.picture.get(1, 1) should_=== original.picture.get(2, 1)
   }
 
+  "remove vertical seam twice" >> {
+    val original = newSeamCarver("3x4.png")
+    val shrunk = newSeamCarver("3x4.png")
+    shrunk.removeVerticalSeam(Array[Int](1, 1, 1, 1))
+    shrunk.removeVerticalSeam(Array[Int](0, 0, 0, 0))
+    shrunk.width() should_== 1
+    shrunk.height() should_== 4
+    shrunk.picture.get(0, 1) should_=== original.picture.get(2, 1)
+  }
+
   "remove vertical seam with out of bounds values in the seam" >> {
     val shrunk = newSeamCarver("3x4.png")
     shrunk.removeVerticalSeam(Array[Int](4, 3, 2, 1)) should throwAn[IllegalArgumentException](message = "out of bounds at 0")
@@ -178,5 +187,107 @@ class SeamCarverSpec extends Specification {
   }
 
   private def newSeamCarver(filename: String) = new SeamCarver(new Picture(new File(classOf[SeamCarverSpec].getResource(s"/seamCarving/$filename").getFile)))
+//
+//
+//  "m-ex1" >> {
+//    val s =
+//      """    A-G    16
+//        |    A-B    15
+//        |    A-F    13
+//        |    B-C    12
+//        |    B-H    11
+//        |    B-G     7
+//        |    C-D     6
+//        |    H-C     3
+//        |    H-D    14
+//        |    D-E     9
+//        |    D-I     4
+//        |    D-J     1
+//        |    E-J     8
+//        |    F-G    17
+//        |    H-G    10
+//        |    H-I     2
+//        |    I-J     5
+//      """.stripMargin
+//    val lines = s.filter(_ != ' ').filter(_ != '-').lines.toList
+//    val g = new EdgeWeightedGraph(10)
+//    def addEdge(l: String): Unit = {
+//      val v = l.charAt(0).asInstanceOf[Int] - 65
+//      val w = l.charAt(1).asInstanceOf[Int] - 65
+//      val weight = l.drop(2).toInt
+//      g.addEdge(new Edge(v, w, weight))
+//    }
+//    lines.foreach(addEdge)
+//
+//    val k = new KruskalMST(g)
+//    System.out.println(k.edges().asScala.toList.map(_.weight().asInstanceOf[Int]).mkString(" "))
+//    true
+//  }
+//
+//  "ex1" >> {
+//    val (a, b, c, d, e, f, g, h) = (0, 1, 2, 3, 4, 5, 6, 7)
+//    val digraph = new EdgeWeightedDigraph(8)
+//    def addEdge(v: Int, w: Int, weight: Double): Unit = digraph.addEdge(new DirectedEdge(v, w, weight))
+//    addEdge(a, e, 15.0)
+//    addEdge(b, a, 25.0)
+//    addEdge(b, f, 24.0)
+//    addEdge(c, b, 7.0)
+//    addEdge(c, f, 33.0)
+//    addEdge(c, g, 28.0)
+//    addEdge(d, c, 33.0)
+//    addEdge(d, h, 18.0)
+//    addEdge(f, a, 4.0)
+//    addEdge(f, e, 24.0)
+//    addEdge(f, g, 0.0)
+//    addEdge(h, c, 5.0)
+//    addEdge(h, g, 35.0)
+//    val dijkstra = new DijkstraSP(digraph, d)
+//    System.out.println((0 until 8).map(dijkstra.distTo).map(_.asInstanceOf[Int]).mkString(" "))
+//    true
+//  }
+//
+//  "ex2" >> {
+//    val (a, b, c, d, e, f, g, h) = (0, 1, 2, 3, 4, 5, 6, 7)
+//    val digraph = new EdgeWeightedDigraph(8)
+//    def addEdge(v: Int, w: Int, weight: Double): Unit = digraph.addEdge(new DirectedEdge(v, w, weight))
+//    addEdge(b, a, 39)
+//    addEdge(c, b, 46)
+//    addEdge(c, d, 9)
+//    addEdge(c, f, 27)
+//    addEdge(c, g, 15)
+//    addEdge(e, a, 30)
+//    addEdge(e, b, 4)
+//    addEdge(f, b, 15)
+//    addEdge(f, e, 31)
+//    addEdge(f, g, 2)
+//    addEdge(h, c, 0)
+//    addEdge(h, d, 13)
+//    addEdge(h, g, 18)
+//    val sp = new AcyclicSP(digraph, h)
+//    System.out.println((0 until 8).map(sp.distTo).map(_.asInstanceOf[Int]).mkString(" "))
+//    true
+//  }
+//
+//  "ex3" >> {
+//    val (a, b, c, d, e, f, g, h) = (0, 1, 2, 3, 4, 5, 6, 7)
+//    val digraph = new EdgeWeightedDigraph(8)
+//    def addEdge(v: Int, w: Int, weight: Double): Unit = digraph.addEdge(new DirectedEdge(v, w, weight))
+//    addEdge(a, e, 34)
+//    addEdge(b, f, 25)
+//    addEdge(b, a, 57)
+//    addEdge(b, c, 16)
+//    addEdge(d, c, 22)
+//    addEdge(f, g, 4)
+//    addEdge(f, a, 22)
+//    addEdge(f, e, 59)
+//    addEdge(g, c, 34)
+//    addEdge(g, b, 8)
+//    addEdge(h, c, 50)
+//    addEdge(h, g, 18)
+//    addEdge(h, d, 28)
+//    val sp = new BellmanFordSP(digraph, h)
+//    System.out.println((0 until 8).map(sp.distTo).map(_.asInstanceOf[Int]).mkString(" "))
+//    true
+//  }
 
 }

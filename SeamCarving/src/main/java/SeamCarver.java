@@ -4,63 +4,27 @@ import java.awt.*;
 import java.util.Arrays;
 
 public class SeamCarver {
-    private Picture picture;
     private PictureFactory pictureFactory;
-
-    private static class PictureFactory {
-        private int[] reds;
-        private int[] greens;
-        private int[] blues;
-        private int width;
-        private int height;
-
-        PictureFactory(int width, int height) {
-            this.reds = new int[width * height];
-            this.greens = new int[width * height];
-            this.blues = new int[width * height];
-            this.width = width;
-            this.height = height;
-        }
-
-        void set(int x, int y, Color color) {
-            final int index = y * width + x;
-            reds[index] = color.getRed();
-            greens[index] = color.getGreen();
-            blues[index] = color.getBlue();
-        }
-
-        Picture create() {
-            final Picture p = new Picture(width, height);
-            int i = 0;
-            for (int y = 0; y < height; ++y) {
-                for (int x = 0; x < width; ++x) {
-                    p.set(x, y, new Color(reds[i], greens[i], blues[i]));
-                    i++;
-                }
-            }
-            return p;
-        }
-    }
+    private Picture picture;
 
     public SeamCarver(Picture picture) {
         if (picture == null) throw new NullPointerException();
-        this.picture = picture;
+        this.pictureFactory = PictureFactory.fromPicture(picture);
     }
 
     public Picture picture() {
-        if (picture == null) {
+        if(picture == null) {
             picture = pictureFactory.create();
-            pictureFactory = null;
         }
         return picture;
     }
 
     public int width() {
-        return picture().width();
+        return pictureFactory.width;
     }
 
     public int height() {
-        return picture().height();
+        return pictureFactory.height;
     }
 
     public double energy(int x, int y) {
@@ -70,8 +34,8 @@ public class SeamCarver {
         if (atBorder(x, width()) || atBorder(y, height())) {
             return 1000.0;
         }
-        final double deltaXSquared = gradientSquared(picture.get(x - 1, y), picture.get(x + 1, y));
-        final double deltaYSquared = gradientSquared(picture.get(x, y - 1), picture.get(x, y + 1));
+        final double deltaXSquared = gradientSquared(pictureFactory.get(x - 1, y), pictureFactory.get(x + 1, y));
+        final double deltaYSquared = gradientSquared(pictureFactory.get(x, y - 1), pictureFactory.get(x, y + 1));
         return Math.sqrt(deltaXSquared + deltaYSquared);
     }
 
@@ -168,17 +132,9 @@ public class SeamCarver {
             throw new IllegalArgumentException("bad seam length");
         }
         checkArrayValues(seam, height());
-        pictureFactory = new PictureFactory(width(), height() - 1);
-        for (int x = 0; x < width(); ++x) {
-            int yPtr = 0;
-            final int removeY = seam[x];
-            for (int y = 0; y < height(); ++y) {
-                if (removeY != y) {
-                    pictureFactory.set(x, yPtr++, picture.get(x, y));
-                }
-            }
-        }
-        this.picture = null;
+
+        picture = null;
+        pictureFactory = pictureFactory.removeHorizontalSeam(seam);
     }
 
     public void removeVerticalSeam(int[] seam) {
@@ -190,17 +146,8 @@ public class SeamCarver {
         }
         checkArrayValues(seam, width());
 
-        pictureFactory = new PictureFactory(width() - 1, height());
-        for (int y = 0; y < height(); ++y) {
-            int xPtr = 0;
-            final int removeX = seam[y];
-            for (int x = 0; x < width(); ++x) {
-                if (removeX != x) {
-                    pictureFactory.set(xPtr++, y, picture.get(x, y));
-                }
-            }
-        }
-        this.picture = null;
+        picture = null;
+        pictureFactory = pictureFactory.removeVerticalSeam(seam);
     }
 
     private void checkArrayValues(int[] xs, int bound) {
