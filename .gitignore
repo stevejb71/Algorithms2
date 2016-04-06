@@ -4,6 +4,7 @@ libs/*
 *.iml
 Graphs/src/test/resources/wordnet
 SeamCarving/src/test/resources/seamCarving
+Baseball/src/test/resources/
 out
 target/
 *.zip
