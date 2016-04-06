@@ -5,7 +5,6 @@ import java.util.Arrays;
 
 public class SeamCarver {
     private PictureFactory pictureFactory;
-    private Picture picture;
 
     public SeamCarver(Picture picture) {
         if (picture == null) throw new NullPointerException();
@@ -13,10 +12,7 @@ public class SeamCarver {
     }
 
     public Picture picture() {
-        if(picture == null) {
-            picture = pictureFactory.create();
-        }
-        return picture;
+        return pictureFactory.create();
     }
 
     public int width() {
@@ -133,7 +129,6 @@ public class SeamCarver {
         }
         checkArrayValues(seam, height());
 
-        picture = null;
         pictureFactory = pictureFactory.removeHorizontalSeam(seam);
     }
 
@@ -146,7 +141,6 @@ public class SeamCarver {
         }
         checkArrayValues(seam, width());
 
-        picture = null;
         pictureFactory = pictureFactory.removeVerticalSeam(seam);
     }
 
