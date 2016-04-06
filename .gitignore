@@ -9,3 +9,4 @@ out
 target/
 *.zip
 SeamCarving/lib/*
+Baseball/lib/*
