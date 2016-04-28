@@ -43,14 +43,20 @@ class BoggleSolverIntegrationSpec extends Specification {
     words.size should_=== 172
   }
 
-//  "lots of qs" >> {
-//    val (_, words) = test("dictionary-16q.txt", "board-16q.txt")
-//    words.size should_=== 15
-//  }
+  "lots of qs" >> {
+    val (_, words) = test("dictionary-16q.txt", "board-16q.txt")
+    words.size should_=== 15
+  }
 
   "load test" >> {
     Loader.loadBoggleSolver("dictionary-zingarelli2005.txt")
     true
+  }
+
+  "board with no valid words" >> {
+    val (score, words) = test("dictionary-2letters.txt", "board-points4410.txt")
+    words should beEmpty
+    score should_=== 0
   }
 
   private def test(dictionaryFilename: String, boardFilename: String): (Int, List[String]) = {

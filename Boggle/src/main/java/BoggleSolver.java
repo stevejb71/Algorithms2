@@ -3,15 +3,15 @@ import java.util.Set;
 
 @SuppressWarnings("WeakerAccess")
 public class BoggleSolver {
-    private final TST<String> dictionaryTrie = new TST<>();
+    private final TrieST dictionaryTrie = new TrieST();
 
     // Initializes the data structure using the given array of strings as the dictionary.
     // (You can assume each word in the dictionary contains only the uppercase letters A through Z.)
     public BoggleSolver(String[] dictionary) {
-        for (String word : dictionary) {
-            if(validWord(word)) {
+        for (final String word : dictionary) {
+            if (validWord(word)) {
                 final String w = word.replaceAll("QU", "Q");
-                dictionaryTrie.put(w, w);
+                dictionaryTrie.put(w, word);
             }
         }
     }
@@ -32,30 +32,22 @@ public class BoggleSolver {
     public Iterable<String> getAllValidWords(BoggleBoard board) {
         final Graph graph = new Graph(board);
         final DFS dfs = new DFS();
-        final Set<String> words = new HashSet<>(256);
+        final Set<String> words = new HashSet<>(2048);
         for(int x = 0; x < board.cols(); ++x) {
             for(int y = 0; y < board.rows(); ++y) {
-                dfs.dfs(graph, x, y, path -> {
-                    final String word = path.s();
-                    if(!isPrefixOfDictionaryWord(word)) {
+                dfs.dfs(board.cols(), board.rows(), graph, x, y, dictionaryTrie.path(), path -> {
+                    if(!path.isPrefixOfWord()) {
                         return false;
                     }
-                    if(contains(word)) {
-                        words.add(word.replaceAll("Q", "QU"));
+                    final String word = path.word();
+                    if(path.word() != null) {
+                        words.add(word);
                     }
                     return true;
                 });
             }
         }
         return words;
-    }
-
-    private boolean contains(String word) {
-        return dictionaryTrie.contains(word);
-    }
-
-    private boolean isPrefixOfDictionaryWord(String word) {
-        return dictionaryTrie.keysWithPrefix(word).iterator().hasNext();
     }
 
     // Returns the score of the given word if it is in the dictionary, zero otherwise.

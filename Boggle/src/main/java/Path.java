@@ -1,57 +1,55 @@
-import java.util.ArrayDeque;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 class Path {
-    private final ArrayDeque<Cube> path;
-    private final Set<Cube> marked; // mutable bool array
+    private final Cube[] path = new Cube[1000];
+    private int cubePtr = 0;
+    private final boolean[] marked;
+    private final TrieST.Path tstIter;
+    private final int cols;
 
-    Path(Cube start) {
-        this(new ArrayDeque<>(), new HashSet<>());
+    Path(int cols, int rows, Cube start, TrieST.Path tstIter) {
+        this(cols, rows, tstIter);
         add(start);
     }
 
-    private Path(ArrayDeque<Cube> path, Set<Cube> marked) {
-        this.path = path;
-        this.marked = marked;
-    }
-
-    Path copy() {
-        return new Path(new ArrayDeque<>(this.path), new HashSet<>(this.marked));
+    private Path(int cols, int rows, TrieST.Path tstIter) {
+        this.marked = new boolean[cols * rows];
+        this.tstIter = tstIter;
+        this.cols = cols;
     }
 
     boolean add(Cube cube) {
-        if(marked.contains(cube)) {
+        final int index = cube.x + cols * cube.y;
+        if(marked[index]) {
             return false;
         }
-        path.addLast(cube);
-        marked.add(cube);
+        path[cubePtr++] = cube;
+        marked[index] = true;
+        tstIter.move(cube.letter);
         return true;
     }
 
     Cube retreat() {
-        final Cube cube = path.removeLast();
-        marked.remove(cube);
+        cubePtr--;
+        final Cube cube = path[cubePtr];
+        final int index = cube.x + cols * cube.y;
+        marked[index] = false;
+        tstIter.retreat();
         return cube;
     }
 
     List<Cube> next(Graph graph) {
-        return graph.neighbours(path.getLast()).stream()
-                .filter(graphNeighbour -> !marked.contains(graphNeighbour))
+        return graph.neighbours(path[cubePtr - 1]).stream()
+                .filter(graphNeighbour -> !marked[graphNeighbour.x + cols * graphNeighbour.y])
                 .collect(Collectors.toList());
     }
 
-    String s() {
-        String s = "";
-        for (Cube cube : path) {
-            s += cube.letter;
-        }
-        return s;
+    boolean isPrefixOfWord() {
+        return tstIter.node() != null;
     }
 
-    public String toString() {
-        return String.format("%s:[%s]", s(), String.join(",", path.stream().map(Object::toString).collect(Collectors.toList())));
+    String word() {
+        return tstIter.nodeVal();
     }
 }
