@@ -9,23 +9,23 @@ public class BoggleSolver {
     // (You can assume each word in the dictionary contains only the uppercase letters A through Z.)
     public BoggleSolver(String[] dictionary) {
         for (final String word : dictionary) {
-            if (validWord(word)) {
-                final String w = word.replaceAll("QU", "Q");
+            final String w = validatedWord(word);
+            if (w != null) {
                 dictionaryTrie.put(w, word);
             }
         }
     }
 
-    private boolean validWord(String word) {
+    private String validatedWord(String word) {
         if(word.length() <= 2 || word.endsWith("Q")) {
-            return false;
+            return null;
         }
         for(int i = 0; i < word.length() - 1; ++i) {
             if(word.charAt(i) == 'Q' && word.charAt(i + 1) != 'U') {
-                return false;
+                return null;
             }
         }
-        return true;
+        return word.replaceAll("QU", "Q");
     }
 
     // Returns the set of all valid words in the given Boggle board, as an Iterable.
@@ -53,7 +53,7 @@ public class BoggleSolver {
     // Returns the score of the given word if it is in the dictionary, zero otherwise.
     // (You can assume the word contains only the uppercase letters A through Z.)
     public int scoreOf(String word) {
-        if(!validWord(word)) {
+        if(validatedWord(word) == null) {
             return 0;
         }
         final String adjusted = word.replaceAll("QU", "Q");
