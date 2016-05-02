@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+zip -j burrows.zip src/main/java/BurrowsWheeler.java src/main/java/BurrowsWheelerImpl.java src/main/java/CircularSuffixArray.java src/main/java/IO.java src/main/java/MoveToFront.java src/main/java/MoveToFrontImpl.java
