@@ -17,15 +17,24 @@ public class BoggleSolver {
     }
 
     private String validatedWord(String word) {
-        if(word.length() <= 2 || word.endsWith("Q")) {
+        if(word.length() <= 2 || word.charAt(word.length() - 1) == 'Q') {
             return null;
         }
-        for(int i = 0; i < word.length() - 1; ++i) {
-            if(word.charAt(i) == 'Q' && word.charAt(i + 1) != 'U') {
-                return null;
+        final char[] copy = new char[word.length()];
+        int copyPtr = 0;
+        char lastChar = '\0';
+        for(int i = 0; i < word.length(); ++i) {
+            final char ch = word.charAt(i);
+            if(lastChar == 'Q') {
+                if(ch != 'U') {
+                    return null;
+                }
+            } else {
+                copy[copyPtr++] = ch;
             }
+            lastChar = ch;
         }
-        return word.replaceAll("QU", "Q");
+        return new String(copy, 0, copyPtr);
     }
 
     // Returns the set of all valid words in the given Boggle board, as an Iterable.
